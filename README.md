@@ -2,13 +2,12 @@
 MAC网页管理器
 
 ## 1.设置 Firebase 项目
-访问 firebase.google.com，登录 Google 账户，创建新项目（免费计划即可）。
+访问 firebase.google.com，登录 Google 账户，创建新项目。
 
-在 Firebase 控制台，选择“Realtime Database”（而非 Firestore，因为它更适合简单实时同步）。
+在 Firebase 控制台，选择“Realtime Database”
 
 点击“创建数据库”，选择“测试模式”（允许读写，后续可加规则限制访问）。数据库 URL 会显示（如 https://your-project-default-rtdb.firebaseio.com）。
-
-配置认证（可选但推荐安全）：在控制台 > Authentication > 启用“匿名”或“Email/Password”方法。
+<img width="1794" height="866" alt="image" src="https://github.com/user-attachments/assets/a2a21976-c2c9-4374-a0c2-ba1909db3493" />
 
 生成服务账户密钥（用于 Python）：控制台 > 项目设置 > 服务账户 > 生成新私钥（下载 JSON 文件，如 firebase_key.json）。
 
