@@ -5,17 +5,37 @@
     <title>Mini Manager</title>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
+    <style>
+        #terminal {
+            background-color: #000;
+            color: #fff;
+            font-family: monospace;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #command {
+            width: 100%;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
     <h1>Mac Mini List</h1>
     <ul id="mini-list"></ul>
-    <input id="mini-id" placeholder="Mini ID">
-    <input id="command" placeholder="Command (e.g., git pull origin main)">
-    <button onclick="sendCommand()">Execute</button>
-    <pre id="output"></pre>
+    <select id="mini-id">
+        <option value="">Select Mini ID</option>
+    </select>
+    <div id="terminal"></div>
+    <input id="command" placeholder="Enter command...">
 
     <script>
-        // Firebase 配置（从控制台 > 项目设置 > 你的应用 > SDK 设置复制）
+        // Firebase 配置
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "your-project.firebaseapp.com",
@@ -28,31 +48,107 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 显示 Mini 列表
+        // 显示 Mini 列表（只显示在线的）并更新下拉选择
         const miniList = document.getElementById('mini-list');
+        const miniSelect = document.getElementById('mini-id');
         db.ref('minis').on('value', (snapshot) => {
+            const selectedId = miniSelect.value;  // 保存当前选中值
             miniList.innerHTML = '';
+            miniSelect.innerHTML = '<option value="">Select Mini ID</option>';  // 重置下拉
             snapshot.forEach((child) => {
                 const id = child.key;
                 const status = child.val().status || 'offline';
-                const li = document.createElement('li');
-                li.textContent = `ID: ${id} - Status: ${status}`;
-                miniList.appendChild(li);
+                if (status === 'online') {
+                    // 更新列表
+                    const li = document.createElement('li');
+                    li.textContent = `ID: ${id} - Status: ${status}`;
+                    miniList.appendChild(li);
+                    // 更新下拉选项
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    miniSelect.appendChild(option);
+                }
             });
+            // 恢复选中值（如果还存在）
+            if (selectedId && Array.from(miniSelect.options).some(opt => opt.value === selectedId)) {
+                miniSelect.value = selectedId;
+            }
         });
+
+        // 终端模拟
+        const terminalDiv = document.getElementById('terminal');
+        const commandInput = document.getElementById('command');
+        let commandHistory = [];  // 命令历史数组
+        let historyIndex = -1;  // 当前历史索引
 
         // 发送命令
         function sendCommand() {
             const miniId = document.getElementById('mini-id').value;
-            const command = document.getElementById('command').value;
+            if (!miniId) {
+                alert('Please select a Mini ID');
+                return;
+            }
+            const command = commandInput.value.trim();
+            if (!command) return;
+
+            // 追加命令到终端显示
+            appendToTerminal(`> ${command}\n`);
+
+            // 添加到历史
+            commandHistory.unshift(command);
+            historyIndex = -1;
+
+            // 清空旧输出以避免显示上一条结果
+            db.ref(`minis/${miniId}/output`).set(null);
+
+            // 发送到 Firebase
             db.ref(`minis/${miniId}/command`).set(command);
 
-            // 监听输出
-            const outputPre = document.getElementById('output');
-            db.ref(`minis/${miniId}/output`).on('value', (snapshot) => {
-                outputPre.textContent = snapshot.val() || 'No output yet';
+            // 监听新输出
+            const outputRef = db.ref(`minis/${miniId}/output`);
+            const listener = outputRef.on('value', (snapshot) => {
+                const output = snapshot.val();
+                if (output) {  // 只当有新输出时追加
+                    appendToTerminal(output + '\n');
+                    // 停止监听以避免后续变化影响
+                    outputRef.off('value', listener);
+                }
             });
+
+            // 清空输入框
+            commandInput.value = '';
+            commandInput.focus();
         }
+
+        // 追加文本到终端并滚动到底部
+        function appendToTerminal(text) {
+            const line = document.createElement('div');
+            line.textContent = text;
+            terminalDiv.appendChild(line);
+            terminalDiv.scrollTop = terminalDiv.scrollHeight;
+        }
+
+        // 监听回车键执行命令
+        commandInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendCommand();
+            } else if (event.key === 'ArrowUp') {  // 上箭头：上一条历史
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    commandInput.value = commandHistory[historyIndex];
+                }
+            } else if (event.key === 'ArrowDown') {  // 下箭头：下一条历史
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    commandInput.value = commandHistory[historyIndex];
+                } else if (historyIndex === 0) {
+                    historyIndex = -1;
+                    commandInput.value = '';
+                }
+            }
+        });
     </script>
 </body>
 </html>
