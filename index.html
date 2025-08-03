@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini Manager</title>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <h1>Mac Mini List</h1>
+    <ul id="mini-list"></ul>
+    <input id="mini-id" placeholder="Mini ID">
+    <input id="command" placeholder="Command (e.g., git pull origin main)">
+    <button onclick="sendCommand()">Execute</button>
+    <pre id="output"></pre>
+
+    <script>
+        // Firebase 配置（从控制台 > 项目设置 > 你的应用 > SDK 设置复制）
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "your-project.firebaseapp.com",
+            databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 显示 Mini 列表
+        const miniList = document.getElementById('mini-list');
+        db.ref('minis').on('value', (snapshot) => {
+            miniList.innerHTML = '';
+            snapshot.forEach((child) => {
+                const id = child.key;
+                const status = child.val().status || 'offline';
+                const li = document.createElement('li');
+                li.textContent = `ID: ${id} - Status: ${status}`;
+                miniList.appendChild(li);
+            });
+        });
+
+        // 发送命令
+        function sendCommand() {
+            const miniId = document.getElementById('mini-id').value;
+            const command = document.getElementById('command').value;
+            db.ref(`minis/${miniId}/command`).set(command);
+
+            // 监听输出
+            const outputPre = document.getElementById('output');
+            db.ref(`minis/${miniId}/output`).on('value', (snapshot) => {
+                outputPre.textContent = snapshot.val() || 'No output yet';
+            });
+        }
+    </script>
+</body>
+</html>
