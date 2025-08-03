@@ -31,9 +31,9 @@ MAC网页管理器
 
     pip install firebase-admin。
 
-将步骤 1 下载的 firebase_key.json 复制到 Mini 上 跟server.py放在一起
+将步骤 1 下载的 firebase_key.json 复制到 Mini 上 跟server.py放在一起。并如下运行：
 
-运行py程序：    python mini_client.py
+    python server.py
 
 运行如下图所示：
 
