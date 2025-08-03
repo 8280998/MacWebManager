@@ -54,19 +54,16 @@
 
 双击打开index.html，自动显示上线的机器。可以直接执行非交互式命令。比如ls,mkdir，git clone等
 
-分别输入上线的id，及执行命令。如下图所示
+选择机器id，在下面输入执行命令。如下图所示
 
-ls
-<img width="1140" height="844" alt="image" src="https://github.com/user-attachments/assets/49705b13-c807-4476-b4db-de82aefe5395" />
+<img width="2048" height="1250" alt="image" src="https://github.com/user-attachments/assets/d335d7da-2fc8-42bc-997c-f24e09b95ecb" />
 
-lscpu
-<img width="1292" height="1424" alt="image" src="https://github.com/user-attachments/assets/66be8621-a4be-48de-8b37-0d287ea0a25c" />
 
 
 
 ## 5 后续
 
-目前只能执行非交互式命令，待后面完善。
+待后面完善。
 
 
 
