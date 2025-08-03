@@ -56,7 +56,12 @@
 
 分别输入上线的id，及执行命令。如下图所示
 
+ls
 <img width="1140" height="844" alt="image" src="https://github.com/user-attachments/assets/49705b13-c807-4476-b4db-de82aefe5395" />
+
+lscpu
+<img width="1292" height="1424" alt="image" src="https://github.com/user-attachments/assets/66be8621-a4be-48de-8b37-0d287ea0a25c" />
+
 
 
 ## 5 后续
