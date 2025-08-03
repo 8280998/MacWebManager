@@ -52,7 +52,7 @@
 
 ## 4 运行
 
-双击打开index.html，自动显示上线的机器。并可以直接非交互式命令。比如ls,mkdir，git clone等
+双击打开index.html，自动显示上线的机器。可以直接执行非交互式命令。比如ls,mkdir，git clone等
 
 分别输入上线的id，及执行命令。如下图所示
 
