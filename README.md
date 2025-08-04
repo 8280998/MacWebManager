@@ -1,9 +1,20 @@
 # MacWebManager
 说明：这是一个自动上线的网页管理器，类似于早期的自动连接木马。
 
-源于打算用多个mini m4撸毛，想做一个管理器。主要原因就是如果在外面，想要管理mini4或其他服务器比较麻烦。比如从A城市的内网去管理B城市的内网mini4.想法来源于主动上线木马。只要机器在线就自动在网页端显示，并可通过网页执行命令
+源于打算用多个mini m4撸毛，想做一个管理器。主要原因就是如果在外面，想要管理mini4或其他内网的机器比较麻烦。比如从A城市的内网去管理B城市的内网mini4.想法来源于主动上线木马。只要机器在线就自动在网页端显示，并可通过网页执行命令.
 
-在mac和ubuntu测试正常。后面打算做成一个完善的管理器。更多功能等测试添加。
+# 目前主要功能：
+
+## 1 在线命令执行
+运行服务端server.py脚本的机器，会自动连线到网页管理器。选择其中之一后即可对此机器执行命令。
+
+## 2 在线文件编辑
+输入文件名后回即可在下方打开文件，编辑后需要点击save File进行保存。
+
+<img width="2848" height="1526" alt="image" src="https://github.com/user-attachments/assets/c03e4fb4-c6c6-4791-9a7f-138d0f84b1c6" />
+
+
+# 部署流程
 
 ## 1.设置 Firebase 项目
 访问 firebase.google.com，登录 Google 账户，创建新项目。
@@ -56,14 +67,14 @@
 
 选择机器id，在下面输入执行命令。如下图所示
 
+更新后的界面：
+<img width="2848" height="1526" alt="image" src="https://github.com/user-attachments/assets/2e93a4f9-8298-4a32-8ba6-8ff4b498e189" />
+
+第一次的界面：
 <img width="2048" height="1250" alt="image" src="https://github.com/user-attachments/assets/d335d7da-2fc8-42bc-997c-f24e09b95ecb" />
 
 
 
-
-## 5 后续
-
-待后面完善。
 
 
 
