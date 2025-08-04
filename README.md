@@ -51,6 +51,12 @@
 
 <img width="1140" height="494" alt="image" src="https://github.com/user-attachments/assets/01b2e031-d9a8-4084-b0a6-0c8e85c53445" />
 
+server.py参数说明：如果机器很多，刚每台机器都要使用不同的机器名以区别。参数如下：
+
+    MINI_ID = "ubuntu" # 手动设置固定名字
+
+    MINI_ID = str(uuid.uuid4()) # 自动生成随机名字
+
 ## 3: 修改网页管理器参数
 
 需要修改参数如下图
