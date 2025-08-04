@@ -2,10 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mini Manager</title>
+    <title>Web Manager</title>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
     <style>
+        body {
+            display: flex;
+        }
+        #sidebar {
+            position: fixed;  /* 磁吸式侧边栏：固定定位 */
+            left: 0;
+            top: 0;
+            width: 200px;
+            height: 100vh;
+            background-color: #f0f0f0;
+            padding: 10px;
+            overflow-y: auto;
+            border-right: 1px solid #ccc;
+        }
+        #main-content {
+            margin-left: 220px;  /* 留出侧边栏空间 */
+            padding: 10px;
+            width: calc(100% - 220px);
+        }
         #terminal {
             background-color: #000;
             color: #fff;
@@ -23,58 +42,108 @@
             box-sizing: border-box;
             font-family: monospace;
         }
+        #file-manager {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        #file-content {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+        }
+        #mini-select {
+            margin-bottom: 10px;
+        }
+        /* 新增样式：使输入框和按钮同一行 */
+        .file-input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .file-input-group input {
+            flex: 1;  /* 输入框占剩余空间 */
+            margin-right: 10px;
+        }
+        .file-input-group button {
+            margin-right: 10px;  /* 按钮间距 */
+        }
     </style>
 </head>
 <body>
-    <h1>Mac Mini List</h1>
-    <ul id="mini-list"></ul>
-    <select id="mini-id">
-        <option value="">Select Mini ID</option>
-    </select>
-    <div id="terminal"></div>
-    <input id="command" placeholder="Enter command...">
+    <!-- 侧边栏：在线机器列表 -->
+    <div id="sidebar">
+        <h2>web管理器</h2>
+        <div id="mini-select">
+            <!-- 勾选模式：使用 radio 单选 -->
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div id="main-content">
+        <div id="terminal"></div>
+        <input id="command" placeholder="Enter command...">
+
+        <!-- 文件管理功能 -->
+        <div id="file-manager">
+            <h2>File Manager</h2>
+            <!-- 输入框和按钮同一行 -->
+            <div class="file-input-group">
+                <input id="file-name" placeholder="Enter file name to edit (e.g., test.txt)">
+                <button onclick="loadFile()">Load File</button>
+                <button onclick="saveFile()">Save File</button>
+            </div>
+            <textarea id="file-content"></textarea>
+        </div>
+    </div>
 
     <script>
         // Firebase 配置
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
-            authDomain: "your-project.firebaseapp.com",
-            databaseURL: "https://your-project-default-rtdb.firebaseio.com",
-            projectId: "your-project",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            authDomain: "xxxxx-dc857.firebaseapp.com",
+            databaseURL: "https://xxxxx-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "xxxxx",
+            storageBucket: "xxxxx.firebasestorage.app",
+            messagingSenderId: "xxxxxx",
+            appId: "xxxxxx"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 显示 Mini 列表（只显示在线的）并更新下拉选择
-        const miniList = document.getElementById('mini-list');
-        const miniSelect = document.getElementById('mini-id');
+        // 更新侧边栏勾选列表（radio单选）
+        const miniSelectDiv = document.getElementById('mini-select');
         db.ref('minis').on('value', (snapshot) => {
-            const selectedId = miniSelect.value;  // 保存当前选中值
-            miniList.innerHTML = '';
-            miniSelect.innerHTML = '<option value="">Select Mini ID</option>';  // 重置下拉
+            // Preserve the current selection before rebuilding the list
+            const previouslySelected = getSelectedMiniId();
+
+            miniSelectDiv.innerHTML = '';  // 清空
             snapshot.forEach((child) => {
                 const id = child.key;
                 const status = child.val().status || 'offline';
                 if (status === 'online') {
-                    // 更新列表
-                    const li = document.createElement('li');
-                    li.textContent = `ID: ${id} - Status: ${status}`;
-                    miniList.appendChild(li);
-                    // 更新下拉选项
-                    const option = document.createElement('option');
-                    option.value = id;
-                    option.textContent = id;
-                    miniSelect.appendChild(option);
+                    const label = document.createElement('label');
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = 'mini-id';
+                    input.value = id;
+                    // Reapply the selection if this matches the previous one
+                    if (id === previouslySelected) {
+                        input.checked = true;
+                    }
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(` ${id} - ${status}`));
+                    miniSelectDiv.appendChild(label);
+                    miniSelectDiv.appendChild(document.createElement('br'));
                 }
             });
-            // 恢复选中值（如果还存在）
-            if (selectedId && Array.from(miniSelect.options).some(opt => opt.value === selectedId)) {
-                miniSelect.value = selectedId;
-            }
         });
+
+        // 获取选中的Mini ID
+        function getSelectedMiniId() {
+            const selected = document.querySelector('input[name="mini-id"]:checked');
+            return selected ? selected.value : null;
+        }
 
         // 终端模拟
         const terminalDiv = document.getElementById('terminal');
@@ -84,41 +153,104 @@
 
         // 发送命令
         function sendCommand() {
-            const miniId = document.getElementById('mini-id').value;
+            const miniId = getSelectedMiniId();
             if (!miniId) {
-                alert('Please select a Mini ID');
+                appendToTerminal('Please select a Mini ID\n');
                 return;
             }
             const command = commandInput.value.trim();
             if (!command) return;
 
-            // 追加命令到终端显示
             appendToTerminal(`> ${command}\n`);
-
-            // 添加到历史
             commandHistory.unshift(command);
             historyIndex = -1;
 
-            // 清空旧输出以避免显示上一条结果
             db.ref(`minis/${miniId}/output`).set(null);
-
-            // 发送到 Firebase
             db.ref(`minis/${miniId}/command`).set(command);
 
-            // 监听新输出
             const outputRef = db.ref(`minis/${miniId}/output`);
             const listener = outputRef.on('value', (snapshot) => {
                 const output = snapshot.val();
-                if (output) {  // 只当有新输出时追加
+                if (output) {
                     appendToTerminal(output + '\n');
-                    // 停止监听以避免后续变化影响
                     outputRef.off('value', listener);
                 }
             });
 
-            // 清空输入框
+            setTimeout(() => {
+                outputRef.off('value', listener);
+                if (terminalDiv.lastChild.textContent === `> ${command}\n`) {
+                    appendToTerminal('Timeout: No response or command failed.\n');
+                }
+            }, 10000);
+
             commandInput.value = '';
             commandInput.focus();
+        }
+
+        // 加载文件内容
+        function loadFile() {
+            const miniId = getSelectedMiniId();
+            if (!miniId) {
+                appendToTerminal('Please select a Mini ID\n');
+                return;
+            }
+            const fileName = document.getElementById('file-name').value.trim();
+            if (!fileName) {
+                appendToTerminal('Enter a file name\n');
+                return;
+            }
+
+            db.ref(`minis/${miniId}/output`).set(null);
+            db.ref(`minis/${miniId}/command`).set(`cat ${fileName}`);
+
+            const outputRef = db.ref(`minis/${miniId}/output`);
+            const listener = outputRef.on('value', (snapshot) => {
+                const output = snapshot.val();
+                if (output) {
+                    document.getElementById('file-content').value = output;
+                    outputRef.off('value', listener);
+                }
+            });
+
+            setTimeout(() => {
+                outputRef.off('value', listener);
+                if (!document.getElementById('file-content').value) {
+                    appendToTerminal('Timeout or file not found\n');
+                }
+            }, 10000);
+        }
+
+        // 保存文件内容（消息改为日志）
+        function saveFile() {
+            const miniId = getSelectedMiniId();
+            if (!miniId) {
+                appendToTerminal('Please select a Mini ID\n');
+                return;
+            }
+            const fileName = document.getElementById('file-name').value.trim();
+            if (!fileName) {
+                appendToTerminal('Enter a file name\n');
+                return;
+            }
+            const content = document.getElementById('file-content').value;
+            const escapedContent = content.replace(/"/g, '\\"');
+            db.ref(`minis/${miniId}/output`).set(null);
+            db.ref(`minis/${miniId}/command`).set(`echo "${escapedContent}" > ${fileName}`);
+
+            const outputRef = db.ref(`minis/${miniId}/output`);
+            const listener = outputRef.on('value', (snapshot) => {
+                const output = snapshot.val();
+                if (output) {
+                    appendToTerminal('File saved: ' + output + '\n');  // 日志模式
+                    outputRef.off('value', listener);
+                }
+            });
+
+            setTimeout(() => {
+                outputRef.off('value', listener);
+                appendToTerminal('File saved successfully (no output from echo)\n');  // 日志模式
+            }, 10000);
         }
 
         // 追加文本到终端并滚动到底部
@@ -134,12 +266,12 @@
             if (event.key === 'Enter') {
                 event.preventDefault();
                 sendCommand();
-            } else if (event.key === 'ArrowUp') {  // 上箭头：上一条历史
+            } else if (event.key === 'ArrowUp') {
                 if (historyIndex < commandHistory.length - 1) {
                     historyIndex++;
                     commandInput.value = commandHistory[historyIndex];
                 }
-            } else if (event.key === 'ArrowDown') {  // 下箭头：下一条历史
+            } else if (event.key === 'ArrowDown') {
                 if (historyIndex > 0) {
                     historyIndex--;
                     commandInput.value = commandHistory[historyIndex];
@@ -147,6 +279,14 @@
                     historyIndex = -1;
                     commandInput.value = '';
                 }
+            }
+        });
+
+        // 新增：文件名输入框按回车加载文件
+        document.getElementById('file-name').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();  // 防止默认换行
+                loadFile();
             }
         });
     </script>
