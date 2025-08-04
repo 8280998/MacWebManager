@@ -11,8 +11,6 @@
 ## 2 在线文件编辑
 输入文件名后回即可在下方打开文件，编辑后需要点击save File进行保存。
 
-<img width="2848" height="1526" alt="image" src="https://github.com/user-attachments/assets/c03e4fb4-c6c6-4791-9a7f-138d0f84b1c6" />
-
 
 # 部署流程
 
@@ -68,7 +66,8 @@
 选择机器id，在下面输入执行命令。如下图所示
 
 更新后的界面：
-<img width="2848" height="1526" alt="image" src="https://github.com/user-attachments/assets/2e93a4f9-8298-4a32-8ba6-8ff4b498e189" />
+<img width="2804" height="1538" alt="image" src="https://github.com/user-attachments/assets/2f2752e9-3d1a-46d7-8591-94f7111afd99" />
+
 
 第一次的界面：
 <img width="2048" height="1250" alt="image" src="https://github.com/user-attachments/assets/d335d7da-2fc8-42bc-997c-f24e09b95ecb" />
